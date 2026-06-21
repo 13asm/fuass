@@ -43,7 +43,7 @@ from the latest release and run `fuass.exe`.
 **Cross-platform (Java required):** download the `.jar` file from the latest
 release and run:
 
-    java -jar fuass-vX.X.X.jar
+    java -jar fuass_vX.X.X.jar
 
 ## Acknowledgements
 
