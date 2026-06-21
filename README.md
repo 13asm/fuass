@@ -1,7 +1,6 @@
 # fuass (Freedom Unite Armor Set Searcher)
 <p>
-  <a href="https://github.com/13asm/fuass/releases"><img alt="Release" src="https://img.shields.io/github/v/release/13asm/fuass"/></a>
-  <a href="https://opensource.org/licenses/mit"><img alt="License" src="https://img.shields.io/github/license/13asm/fuass"/></a>
+  <a href="https://github.com/13asm/fuass/releases"><img alt="Release" src="https://img.shields.io/github/v/release/13asm/fuass?include_prereleases"/></a>  <a href="https://opensource.org/licenses/mit"><img alt="License" src="https://img.shields.io/github/license/13asm/fuass"/></a>
   <a href="https://www.oracle.com/java/technologies/downloads/"><img alt="Java" src="https://img.shields.io/badge/Java-26%2B-orange?logo=openjdk"/></a>
   <a href="https://github.com/13asm"><img alt="Profile" src="https://img.shields.io/badge/-13asm-blue?logo=github"/></a>
 </p>
