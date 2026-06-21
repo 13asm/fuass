@@ -6,6 +6,9 @@ out/
 .idea/
 *.iml
 *.iws
+META-INF/
+fuass/
+*.zip
 
 ### Eclipse ###
 .apt_generated
