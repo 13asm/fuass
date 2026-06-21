@@ -56,4 +56,4 @@ release and run:
 
 ## License
 
-MIT License — see [MIT License](LICENSE) for details.
+This project is licensed under the [MIT License](LICENSE).
