@@ -1,0 +1,214 @@
+id,name,points,points_name
+1,Attack Up (Large),20,Attack
+2,Attack Up (Medium),15,Attack
+3,Attack Up (Small),10,Attack
+4,Attack Down (Small),-10,Attack
+5,Attack Down (Medium),-15,Attack
+6,Attack Down (Large),-20,Attack
+7,Defense +40,20,Defense
+8,Defense +30,15,Defense
+9,Defense +20,10,Defense
+10,Defense -20,-10,Defense
+11,Defense -30,-15,Defense
+12,Defense -40,-20,Defense
+13,Health +50,20,Health
+14,Health +30,15,Health
+15,Health +20,10,Health
+16,Health -10,-10,Health
+17,Health -20,-15,Health
+18,Health -30,-20,Health
+19,All Res +10,20,All Resist
+20,All Res +5,15,All Resist
+21,All Res +3,10,All Resist
+22,All Res -3,-10,All Resist
+23,All Res -5,-15,All Resist
+24,All Res -10,-20,All Resist
+25,Fire Res +10,15,Fire Res
+26,Fire Res +5,10,Fire Res
+27,Fire Res -5,-10,Fire Res
+28,Fire Res -10,-15,Fire Res
+29,Water Res +10,15,Water Res
+30,Water Res +5,10,Water Res
+31,Water Res -5,-10,Water Res
+32,Water Res -10,-15,Water Res
+33,Thunder Res +10,15,ThunderRes
+34,Thunder Res +5,10,ThunderRes
+35,Thunder Res -5,-10,ThunderRes
+36,Thunder Res -10,-15,ThunderRes
+37,Ice Res +10,15,Ice Res
+38,Ice Res +5,10,Ice Res
+39,Ice Res -5,-10,Ice Res
+40,Ice Res -10,-15,Ice Res
+41,Dragon Res +10,15,Dragon Res
+42,Dragon Res +5,10,Dragon Res
+43,Dragon Res -5,-10,Dragon Res
+44,Dragon Res -10,-15,Dragon Res
+45,Faint Negated,15,Faint
+46,Faint Prob Halved,10,Faint
+47,Faint Duration[x2],-10,Faint
+48,Poison Negated,15,Poison
+49,Poison Dur Halved,10,Poison
+50,Poison Dur[x2],-10,Poison
+51,Paralysis Negated,15,Paralysis
+52,Para Duration Halved,10,Paralysis
+53,Para Duration[x2],-10,Paralysis
+54,Sleep Negated,15,Sleep
+55,Sleep Dur Halved,10,Sleep
+56,Sleep Duration[x2],-10,Sleep
+57,Antiseptic,10,Antiseptic
+58,Fatigue Cancellation,10,Fatigue
+59,Snow Res,10,Snow Res
+60,Quake Resistance,10,Quake Res
+61,High Grade Earplug,15,HearProtct
+62,Earplug,10,HearProtct
+63,Dragon Wind Breaker,20,WindPress
+64,High Wind Res,15,WindPress
+65,Low Wind Res,10,WindPress
+66,Steal No Effect,10,Anti-Theft
+67,Self-Defense,10,ResistSts
+68,Metallic Protection,10,AntiFirDrg
+69,Frosty Protection,10,AntiDaora
+70,Fiery Protection,10,AntiChamel
+71,Sharpness +1,10,Artisan
+72,Sharp Sword,10,Sharpness
+73,Blunt,-10,Sharpness
+74,ESP,10,Fencing
+75,Sharpening Skl Inc,10,SwdShrpner
+76,Sharpening Skl Half,-10,SwdShrpner
+77,Guard +2,20,Guard
+78,Guard +1,10,Guard
+79,Guard -1,-10,Guard
+80,Auto-Guard,10,Auto-Guard
+81,Art of Unsheathing,10,Sword Draw
+82,Stellar Hunter,10,Edgemaster
+83,NormalS/RapidBow Up,10,NormalS Up
+84,PierceS/PierceBow Up,10,PierceS Up
+85,PelletS/ScattrBow Up,10,PelletS Up
+86,Normal S All LV Add,10,NormalSAdd
+87,Pierce S All LV Add,15,PierceSAdd
+88,Pierce S LV1 Add,10,PierceSAdd
+89,Pellet S All LV Add,15,PelletSAdd
+90,Pellet S LV 1 Add,10,PelletSAdd
+91,Crag S All LV Add,15,Crag S Add
+92,Crag S LV 1 Add,10,Crag S Add
+93,Clust S All LV Add,15,ClustS Add
+94,Clust S LV 1 Add,10,ClustS Add
+95,Reloading Speed +3,20,Reload
+96,Reloading Speed +2,15,Reload
+97,Reloading Speed +1,10,Reload
+98,Reloading Speed -1,-10,Reload
+99,Reloading Speed -2,-15,Reload
+100,Reloading Speed -3,-20,Reload
+101,Auto Reload,10,AutoReload
+102,Recoil Reduction +2,20,Recoil
+103,Recoil Reduction +1,10,Recoil
+104,Shell Deviation Down,10,Precision
+105,Shell Deviation Up,-10,Precision
+106,Poison Coating Add,10,PoisonCAdd
+107,Paralysis Coat Add,10,ParalyCAdd
+108,Sleep Coating Add,10,SleepCAdd
+109,Power Coating Add,10,PowerCAdd
+110,ClsRngCAdd,10,ClsRngCAdd
+111,Straight & True,10,SteadyHand
+112,Reckless Abandon +3,20,Expert
+113,Reckless Abandon +2,15,Expert
+114,Reckless Abandon +1,10,Expert
+115,Reckless Abandon -1,-10,Expert
+116,Reckless Abandon -2,-15,Expert
+117,Abnormal Sts Atk Up,10,Spc Attack
+118,Element Attack Up,10,ElementAtk
+119,Damage Rec Speed +2,20,Rec Speed
+120,Damage Rec Speed +1,10,Rec Speed
+121,Damage Rec Speed -1,-10,Rec Speed
+122,Damage Rec Speed -2,-20,Rec Speed
+123,Divine Protection,10,Protection
+124,Demonic Protection,-10,Protection
+125,Guard Inc,10,Guard Up
+126,Evade +2,15,Evade
+127,Evade +1,10,Evade
+128,Evade Distance Up,10,Evade Dist
+129,Adrenaline +2,15,Potential
+130,Adrenaline +1,10,Potential
+131,Worry,-10,Potential
+132,Gunnery King,15,Gunnery
+133,Gunnery Master,10,Gunnery
+134,Capacity Up,10,Capacity
+135,Focus,10,ShortCharg
+136,Distracted,-10,ShortCharg
+137,Guts,10,Guts
+138,Emboldened,10,Fury
+139,Farsight,10,Map
+140,Map Unavailable,-10,Map
+141,Autotracker,15,PsychicVis
+142,Detect,10,PsychicVis
+143,Gathering +2,15,Gathering
+144,Gathering +1,10,Gathering
+145,Gathering -1,-10,Gathering
+146,Carving Celebrity,20,Carving
+147,Carving Iron Man,10,Carving
+148,High Speed Gathering,10,HiSpdGathr
+149,Backpacking Expert,10,Backpackng
+150,Divine Whim,15,Whim
+151,Spirit's Whim,10,Whim
+152,Spectre's Whim,-10,Whim
+153,Devil's Whim,-15,Whim
+154,Fishing Expert,10,Fishing
+155,Heat Cancel [Hi],15,Heat Res
+156,Heat Cancel [Lo],10,Heat Res
+157,Heat Inc [Lo],-10,Heat Res
+158,Heat Inc [Hi],-15,Heat Res
+159,Cold Elimination[Hi],15,Cold Res
+160,Cold Elimination[Lo],10,Cold Res
+161,Cold Increase [Lo],-10,Cold Res
+162,Cold Increase [Hi],-15,Cold Res
+163,TerrainDamageNegate,15,Terrain
+164,TerrainDamageHalf,10,Terrain
+165,TerrainDamageInc[Lo],-10,Terrain
+166,TerrainDamageInc[Hi],-15,Terrain
+167,Runner,10,Stamina
+168,Flat Footed,-10,Stamina
+169,Constitution +2,15,Constitutn
+170,Constitution +1,10,Constitutn
+171,Constitution -1,-10,Constitutn
+172,Constitution -2,-15,Constitutn
+173,Hunger Negated,15,Hunger
+174,Hunger Halved,10,Hunger
+175,Hunger Increase [Lo],-10,Hunger
+176,Hunger Increase [Hi],-15,Hunger
+177,Stealth,10,Sneak
+178,Taunt,-10,Sneak
+179,Luck Booster,15,Fate
+180,Good Luck,10,Fate
+181,Bad Luck,-10,Fate
+182,Calamity,-20,Fate
+183,Trap Master,10,SpeedSetup
+184,Tranquilizing Celeb,15,Tranquilzr
+185,Tranquilizing Whiz,10,Tranquilzr
+186,Tranquilizing Guru,10,Perceive
+187,HealthRecItemsImprvd,10,Recovery
+188,HealthRecItemsWeaknd,-10,Recovery
+189,Item Usage Improve,10,Everlastng
+190,Item Usage Decline,-10,Everlastng
+191,Wide Area +2,20,Wide Area
+192,Wide Area +1,10,Wide Area
+193,Throwing Skill Up,10,Throw
+194,Bomber,10,BombStrUp
+195,Scavenger,15,Gluttony
+196,Filled Up,10,Gluttony
+197,Quick Eating,10,Cooking
+198,Slow Life,-10,Cooking
+199,BBQ Celebrity,10,BBQ
+200,So-Called BBQ King,-10,BBQ
+201,Flute Expert,10,Horn
+202,Combine Success +45%,20,MixSucRate
+203,Combine Success +25%,15,MixSucRate
+204,Combine Success +15%,10,MixSucRate
+205,Combine Success -5%,-10,MixSucRate
+206,Combine Success -10%,-15,MixSucRate
+207,Combine Success -15%,-20,MixSucRate
+208,Bullet Limit,10,Shot Mix
+209,Alchemy,10,Alchemy
+210,ComradGuidance&Trade,15,ComrdGuide
+211,Comrade Guidance,10,ComrdGuide
+212,Comrade Attack Up,10,ComradeAtk
+213,Comrade Defense Up,10,ComradeDef
