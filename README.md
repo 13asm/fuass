@@ -1,15 +1,9 @@
 # fuass (Freedom Unite Armor Set Searcher)
-<p>
-  <a href="https://github.com/13asm/fuass/releases"><img alt="Release" src="https://img.shields.io/github/v/release/13asm/fuass?include_prereleases"/></a>  
-  <a href="https://opensource.org/licenses/mit"><img alt="License" src="https://img.shields.io/github/license/13asm/fuass"/></a>
-  <a href="https://www.oracle.com/java/technologies/downloads/"><img alt="Java" src="https://img.shields.io/badge/Java-26%2B-orange?logo=openjdk"/></a>
-  <a href="https://github.com/13asm"><img alt="Profile" src="https://img.shields.io/badge/-13asm-blue?logo=github"/></a>
-</p>
 
 A desktop tool for Monster Hunter Freedom Unite (MHFU) that finds optimal armor
 combinations for a given set of target skills.
 
-This project is inspired by [Athena's ASS](https://github.com/AthenaADP/MHFU-ASS),
+This project is inspired by [Athena's A.S.S.](https://github.com/AthenaADP/MHFU-ASS),
 another MHFU armor set searcher that served as reference for features and UI design.
 
 ## Features
@@ -47,7 +41,7 @@ release and run:
 
 ## Acknowledgements
 
-- Inspired by [Athena's ASS](https://github.com/AthenaADP/MHFU-ASS).
+- Inspired by [Athena's A.S.S.](https://github.com/AthenaADP/MHFU-ASS).
 - Game data obtained thanks to [@gaugustini](https://github.com/gaugustini), 
   from [Monster Hunter Freedom Unite Database](https://github.com/Kolyn090/mhfu-db)
   and the android app [MHFU Database](https://github.com/gaugustini/MHFUDatabase).
