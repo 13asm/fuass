@@ -7,7 +7,6 @@ out/
 *.iml
 *.iws
 META-INF/
-fuass/
 *.zip
 
 ### Eclipse ###

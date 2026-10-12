@@ -9,6 +9,10 @@ import java.awt.*;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Builds the results panel UI from a list of combinations.
+ * Limits display to {@link #MAX_RESULTS} combinations for performance.
+ */
 public class ResultsBuilder {
 
     private static final int MAX_RESULTS  = 100;

@@ -1,8 +1,13 @@
 package fuass.model;
 
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Encapsulates all user-configurable search filters including gender, rank,
+ * weapon class, slots, and various boolean flags.
+ */
 public class FilterOptions {
 
     private static final Pattern DIGITS_PATTERN = Pattern.compile("\\d+");
@@ -48,7 +53,7 @@ public class FilterOptions {
         if (matcher.find()) {
             return Integer.parseInt(matcher.group());
         }
-        return 0;
+        throw new IllegalArgumentException("Invalid rank format: " + rankLabel);
     }
 
     private int parseWeaponSlots(String slotPattern) {
@@ -58,5 +63,26 @@ public class FilterOptions {
             case "o o o" -> 3;
             default -> 0; // covers "- - -"
         };
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        FilterOptions that = (FilterOptions) o;
+        return hunterRank == that.hunterRank
+                && villageRank == that.villageRank
+                && weaponSlots == that.weaponSlots
+                && allowBadSkills == that.allowBadSkills
+                && allowTorsoInc == that.allowTorsoInc
+                && allowDummy == that.allowDummy
+                && Objects.equals(gender, that.gender)
+                && Objects.equals(weaponClass, that.weaponClass);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(gender, hunterRank, villageRank, weaponClass, weaponSlots,
+                allowBadSkills, allowTorsoInc, allowDummy);
     }
 }

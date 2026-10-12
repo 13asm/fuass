@@ -1,5 +1,9 @@
 package fuass.model;
 
+/**
+ * Represents a skill with its activation threshold and display properties.
+ * Skills can be positive (beneficial) or negative (harmful).
+ */
 public class Skill {
 
     private final int id;
@@ -36,4 +40,17 @@ public class Skill {
     // ---setters---
 
     public void setVisible(boolean visible) { isVisible = visible; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Skill skill = (Skill) o;
+        return id == skill.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
+    }
 }

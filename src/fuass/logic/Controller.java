@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
+/**
+ * Coordinates the search workflow: filters candidates, applies Pareto pruning,
+ * and delegates combination finding to the {@link Combinator}.
+ */
 public class Controller {
 
     private final Consumer<Integer> progressCallback;
@@ -23,17 +27,21 @@ public class Controller {
         this.dataStore = dataStore;
     }
 
-    public List<Combination> search(List<Skill> selectedSkills, FilterOptions filterOptions)
-            throws InterruptedException {
-
-        List<Skill> skillsWithTorso = new ArrayList<>(selectedSkills);
+    private List<Skill> addTorsoIncToSkills(List<Skill> selectedSkills, FilterOptions filterOptions) {
+        List<Skill> skillsPlusTorso = new ArrayList<>(selectedSkills);
         if (filterOptions.isAllowTorsoInc()) {
-            skillsWithTorso.add(new Skill("Torso Inc"));
+            skillsPlusTorso.add(new Skill("Torso Inc"));
         }
+        return skillsPlusTorso;
+    }
+
+    public DataPool getFilteredCandidates(List<Skill> selectedSkills, FilterOptions filterOptions) {
+
+        List<Skill> skillsPlusTorso = addTorsoIncToSkills(selectedSkills, filterOptions);
 
         // ---build predicates---
 
-        Predicate<Armor> armorFilter = predicateMaker.armorPredicate(skillsWithTorso, filterOptions);
+        Predicate<Armor> armorFilter = predicateMaker.armorPredicate(skillsPlusTorso, filterOptions);
         Predicate<Decoration> decorationFilter = predicateMaker.decorationPredicate(selectedSkills, filterOptions);
 
         // ---filter raw data---
@@ -45,23 +53,36 @@ public class Controller {
         List<Armor> leggingsFiltered         = filterList(dataStore.getLeggings(),    armorFilter);
         List<Decoration> decorationsFiltered = filterList(dataStore.getDecorations(), decorationFilter);
 
-        // TODO: add wildcard armors ("any helmet with X slots") as fallback candidates
-        /*
-        addAnyArmorWithXSlots(helmetsFiltered,   "helmet");
-        addAnyArmorWithXSlots(platesFiltered,    "plate");
-        addAnyArmorWithXSlots(gauntletsFiltered, "gauntlet");
-        addAnyArmorWithXSlots(waistsFiltered,    "waist");
-        addAnyArmorWithXSlots(leggingsFiltered,  "legging");
-        */
+        return new DataPool(helmetsFiltered, platesFiltered, gauntletsFiltered, waistsFiltered, leggingsFiltered,
+                decorationsFiltered);
+    }
+
+    public DataPool getParetoPool(DataPool pool,
+                                           List<Skill> selectedSkills, FilterOptions filterOptions) {
 
         // ---dominance (pareto) pruning---
 
-        List<Armor> bestHelmets          = DominanceFilter.armorParetoFilter(helmetsFiltered,   skillsWithTorso);
-        List<Armor> bestPlates           = DominanceFilter.armorParetoFilter(platesFiltered,    selectedSkills);
-        List<Armor> bestGauntlets        = DominanceFilter.armorParetoFilter(gauntletsFiltered, skillsWithTorso);
-        List<Armor> bestWaists           = DominanceFilter.armorParetoFilter(waistsFiltered,    skillsWithTorso);
-        List<Armor> bestLeggings         = DominanceFilter.armorParetoFilter(leggingsFiltered,  skillsWithTorso);
-        List<Decoration> bestDecorations = DominanceFilter.decoParetoFilter(decorationsFiltered, selectedSkills);
+        List<Skill> skillsPlusTorso = addTorsoIncToSkills(selectedSkills, filterOptions);
+
+        List<Armor> bestHelmets          = DominanceFilter.armorParetoFilter(pool.helmets(),    skillsPlusTorso);
+        List<Armor> bestPlates           = DominanceFilter.armorParetoFilter(pool.plates(),     selectedSkills);
+        List<Armor> bestGauntlets        = DominanceFilter.armorParetoFilter(pool.gauntlets(),  skillsPlusTorso);
+        List<Armor> bestWaists           = DominanceFilter.armorParetoFilter(pool.waists(),     skillsPlusTorso);
+        List<Armor> bestLeggings         = DominanceFilter.armorParetoFilter(pool.leggings(),   skillsPlusTorso);
+        List<Decoration> bestDecorations = DominanceFilter.decoParetoFilter(pool.decorations(), selectedSkills);
+
+        return new DataPool(bestHelmets, bestPlates, bestGauntlets, bestWaists, bestLeggings, bestDecorations);
+    }
+
+    public List<Combination> combine(DataPool pool, List<Skill> selectedSkills, FilterOptions filterOptions)
+            throws InterruptedException {
+
+        List<Armor> bestHelmets = new ArrayList<>(pool.helmets());
+        List<Armor> bestPlates = new ArrayList<>(pool.plates());
+        List<Armor> bestGauntlets = new ArrayList<>(pool.gauntlets());
+        List<Armor> bestWaists = new ArrayList<>(pool.waists());
+        List<Armor> bestLeggings = new ArrayList<>(pool.leggings());
+        List<Decoration> bestDecorations = new ArrayList<>(pool.decorations());
 
         // null represents an empty armor slot
         // empty-slot pieces are added to allow partial solutions
@@ -82,6 +103,14 @@ public class Controller {
         return combinator.combineWithPruning(allArmors, bestDecorations, selectedSkills, filterOptions);
     }
 
+    public List<Combination> search(List<Skill> selectedSkills, FilterOptions filterOptions)
+            throws InterruptedException {
+
+        DataPool pool = getFilteredCandidates(selectedSkills, filterOptions);
+        pool = getParetoPool(pool, selectedSkills, filterOptions);
+        return combine(pool, selectedSkills, filterOptions);
+    }
+
     private <T> List<T> filterList(List<T> list, Predicate<T> predicate) {
         List<T> result = new ArrayList<>();
         for (T item : list) {
@@ -91,6 +120,16 @@ public class Controller {
         }
         return result;
     }
+
+    // TODO: add wildcard armors ("any helmet with X slots") as fallback candidates
+    /*
+    addAnyArmorWithXSlots(helmetsFiltered,   "helmet");
+    addAnyArmorWithXSlots(platesFiltered,    "plate");
+    addAnyArmorWithXSlots(gauntletsFiltered, "gauntlet");
+    addAnyArmorWithXSlots(waistsFiltered,    "waist");
+    addAnyArmorWithXSlots(leggingsFiltered,  "legging");
+    */
+
     /*
     private void addAnyArmorWithXSlots(List<Armor> list, String type) {
         list.add(new Armor(type, 1));

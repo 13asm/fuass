@@ -17,7 +17,7 @@ another MHFU armor set searcher that served as reference for features and UI des
 ## Planned Features
 
 - [ ] Accurate hunter and village rank filters.
-- [ ] Advanced Search: filter by specific armor/decoration or exclude them.
+- [x] Advanced Search: filter by specific armor/decoration or exclude them.
 
 ## Screenshots
 ![Main Window](screenshots/screenshot1.png)

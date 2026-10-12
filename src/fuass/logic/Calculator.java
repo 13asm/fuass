@@ -9,6 +9,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Utility class providing static methods for armor and decoration calculations.
+ * Includes methods for filtering decorations, checking skill mixes, and calculating efficiencies.
+ */
 public class Calculator {
 
     public static final int BAD_SKILL_THRESHOLD = -10;
@@ -48,7 +52,23 @@ public class Calculator {
         return result;
     }
 
+    /**
+     * Checks if any decoration has a "bad mix" of skills: at least one beneficial
+     * and one harmful skill point contribution.
+     */
     public static boolean hasBadMixJewels(List<Skill> skills, List<Decoration> decorations) {
+        return hasMixJewels(skills, decorations, true);
+    }
+
+    /**
+     * Checks if any decoration has a "good mix" of skills: at least two beneficial
+     * skill point contributions.
+     */
+    public static boolean hasGoodMixJewels(List<Skill> skills, List<Decoration> decorations) {
+        return hasMixJewels(skills, decorations, false);
+    }
+
+    private static boolean hasMixJewels(List<Skill> skills, List<Decoration> decorations, boolean checkBad) {
         for (Decoration deco : decorations) {
             if (deco.getSkills().size() > 1) {
                 int beneficialCount = 0;
@@ -64,27 +84,8 @@ public class Calculator {
                         else harmfulCount++;
                     }
                 }
-                if (beneficialCount >= 1 && harmfulCount >= 1) return true;
-            }
-        }
-        return false;
-    }
-
-    public static boolean hasGoodMixJewels(List<Skill> skills, List<Decoration> decorations) {
-        for (Decoration deco : decorations) {
-            if (deco.getSkills().size() > 1) {
-                int beneficialCount = 0;
-                for (Skill skill : skills) {
-                    String name = skill.getPointsName();
-                    int required = skill.getPointsToActivate();
-                    int points = deco.getSkillPoints(name);
-                    if (deco.hasSkill(name)) {
-                        // XOR sign check: result is negative only if the two values have opposite signs
-                        boolean sameSign = (points ^ required) >= 0;
-                        if (sameSign) beneficialCount++;
-                    }
-                }
-                if (beneficialCount >= 2) return true;
+                if (checkBad && beneficialCount >= 1 && harmfulCount >= 1) return true;
+                if (!checkBad && beneficialCount >= 2) return true;
             }
         }
         return false;
@@ -148,26 +149,26 @@ public class Calculator {
         Map<String, Integer> result = new HashMap<>();
 
         if (torsoCounter > 0) {
-            addSkillsFast(result, armorCombo.getFirst().getSkills(), torsoCounter + 1);
+            addSkillsWithMultiplier(result, armorCombo.getFirst().getSkills(), torsoCounter + 1);
             for (Decoration deco : plateDecoCombo) {
-                addSkillsFast(result, deco.getSkills(), torsoCounter + 1);
+                addSkillsWithMultiplier(result, deco.getSkills(), torsoCounter + 1);
             }
         }
 
         for (int i = 0; i < armorCombo.size(); i++) {
             if (armorCombo.get(i) != null && !(i == 0 && torsoCounter > 0)) {
-                addSkillsFast(result, armorCombo.get(i).getSkills(), 1);
+                addSkillsWithMultiplier(result, armorCombo.get(i).getSkills(), 1);
             }
         }
 
         for (Decoration deco : decoCombo) {
-            addSkillsFast(result, deco.getSkills(), 1);
+            addSkillsWithMultiplier(result, deco.getSkills(), 1);
         }
 
         return result;
     }
 
-    private static void addSkillsFast(Map<String, Integer> target, Map<String, Integer> source, int multiplier) {
+    private static void addSkillsWithMultiplier(Map<String, Integer> target, Map<String, Integer> source, int multiplier) {
         for (Map.Entry<String, Integer> entry : source.entrySet()) {
             target.merge(entry.getKey(), entry.getValue() * multiplier, Integer::sum);
         }

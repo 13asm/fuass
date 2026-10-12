@@ -7,9 +7,13 @@ import javax.swing.*;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 import java.awt.*;
 
+/**
+ * Entry point for the fuass (Freedom Unite Armor Set Searcher) application.
+ * Initializes the look and feel, loads game data, and launches the GUI.
+ */
 public class Main {
 
-    static void main() {
+    public static void main(String[] args) {
         try {
             applyLookAndFeel();
             applyGlobalFont();

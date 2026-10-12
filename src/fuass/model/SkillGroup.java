@@ -3,6 +3,10 @@ package fuass.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Groups related skills that share the same points name.
+ * Used to determine which skills are activated at given point thresholds.
+ */
 public class SkillGroup {
 
     private final String groupName;

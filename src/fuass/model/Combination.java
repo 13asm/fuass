@@ -3,6 +3,10 @@ package fuass.model;
 import java.util.*;
 import java.util.function.ToIntFunction;
 
+/**
+ * Represents a valid armor-decoration combination found by the search engine.
+ * Contains all armor pieces, decorations, and computed stats.
+ */
 public class Combination {
 
     private int id;

@@ -4,25 +4,39 @@ import javax.swing.*;
 import java.awt.*;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+/**
+ * Loads and caches game icons from classpath resources.
+ * Icons are loaded lazily on first access to minimize startup time.
+ *
+ * <p>All UI classes share the single instance returned by {@link #shared()},
+ * so every icon is decoded and scaled only once for the whole application.
+ */
 public class IconLoader {
 
     private static final int ICON_SIZE = 12;
+
+    /** Icon keys in display order: defense, then the elemental resistances. */
     private static final String[] ICON_KEYS = {
             "baseDefense", "maxDefense", "fire", "water", "thunder", "ice", "dragon"
     };
 
+    private static final IconLoader SHARED = new IconLoader();
+
     private final Map<String, ImageIcon> icons = new HashMap<>();
 
-    public IconLoader() {
-        loadIcons();
+    private IconLoader() {}
+
+    /** The one loader used across the UI. */
+    public static IconLoader shared() {
+        return SHARED;
     }
 
-    private void loadIcons() {
-        for (String key : ICON_KEYS) {
-            icons.put(key, loadIcon("icons/" + key + ".png"));
-        }
+    /** Icon keys in the order the matching stat values are listed. */
+    public static List<String> keys() {
+        return List.of(ICON_KEYS);
     }
 
     private ImageIcon loadIcon(String path) {
@@ -40,6 +54,6 @@ public class IconLoader {
     }
 
     public ImageIcon getIcon(String name) {
-        return icons.get(name);
+        return icons.computeIfAbsent(name, key -> loadIcon("icons/" + key + ".png"));
     }
 }

@@ -4,6 +4,7 @@ import fuass.io.DataStore;
 import fuass.logic.Controller;
 import fuass.model.Combination;
 import fuass.model.FilterOptions;
+import fuass.model.DataPool;
 import fuass.model.Skill;
 import fuass.model.SkillGroup;
 
@@ -16,6 +17,10 @@ import java.util.*;
 import java.util.List;
 import java.util.function.Consumer;
 
+/**
+ * Main application window providing the user interface for the armor set searcher.
+ * Manages skill selection, filter configuration, search execution, and result display.
+ */
 public class GUI extends JFrame {
 
     // ---form components---
@@ -52,12 +57,13 @@ public class GUI extends JFrame {
 
     private List<Skill> allSkills;
     private Map<String, SkillGroup> allSkillGroups;
+    private Map<String, Skill> skillByName;
     private final List<Skill> selectedSkills = new ArrayList<>();
     private List<Skill> previousSelectedSkills;
 
     // ---search state---
 
-    private SwingWorker<Void, Integer> searchWorker;
+    private SwingWorker<?, ?> searchWorker;
     private List<Combination> searchResults;
     private final ResultsBuilder resultsBuilder;
     private boolean sortDescending;
@@ -93,14 +99,16 @@ public class GUI extends JFrame {
         allowDummyCheckBox.setSelected(true);
         initStopButton();
         setupSearchButton();
+        setupAdvancedSearchButton();
     }
 
     private void populateComboBox(JComboBox<String> comboBox, String[] items) {
+        MetalLookAndFeel metal = new MetalLookAndFeel();
+        UIDefaults metalDefaults = metal.getDefaults();
+        InputMap metalInputMap = (InputMap) metalDefaults.get("ComboBox.ancestorInputMap");
+
         for (String item : items) {
             comboBox.addItem(item);
-            MetalLookAndFeel metal = new MetalLookAndFeel();
-            UIDefaults metalDefaults = metal.getDefaults();
-            InputMap metalInputMap = (InputMap) metalDefaults.get("ComboBox.ancestorInputMap");
             comboBox.setInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, metalInputMap);
         }
     }
@@ -164,6 +172,10 @@ public class GUI extends JFrame {
 
     private void loadAllSkillsData() {
         allSkills = new ArrayList<>(dataStore.getSkills());
+        skillByName = new HashMap<>();
+        for (Skill skill : allSkills) {
+            skillByName.put(skill.getName(), skill);
+        }
     }
 
     private void loadAllSkillGroups(List<Skill> skills) {
@@ -176,10 +188,7 @@ public class GUI extends JFrame {
     }
 
     private Skill findSkillByName(String skillName) {
-        for (Skill skill : allSkills) {
-            if (skill.getName().equals(skillName)) return skill;
-        }
-        return null;
+        return skillByName.get(skillName);
     }
 
     private void setSkillVisibility(Skill selectedSkill, boolean isVisible) {
@@ -329,6 +338,10 @@ public class GUI extends JFrame {
         searchButton.addActionListener(_ -> startSearchInBackground());
     }
 
+    private void setupAdvancedSearchButton() {
+        advancedSearchButton.addActionListener(_ -> startAdvancedSearchInBackground());
+    }
+
     private FilterOptions gatherFilterOptions() {
         return new FilterOptions(
                 (String) genderComboBox.getSelectedItem(),
@@ -349,7 +362,7 @@ public class GUI extends JFrame {
         previousSelectedSkills = new ArrayList<>(selectedSkills);
         final List<Skill> skillsSnapshot = new ArrayList<>(selectedSkills);
 
-        searchWorker = new SwingWorker<>() {
+        SwingWorker<Void, Integer> worker = new SwingWorker<>() {
 
             @Override
             protected Void doInBackground() throws InterruptedException {
@@ -388,7 +401,99 @@ public class GUI extends JFrame {
                 }
             }
         };
-        searchWorker.execute();
+        searchWorker = worker;
+        worker.execute();
+    }
+
+    // ---advanced search---
+
+    private record AdvancedSearchCandidates(DataPool fullPool, DataPool paretoPool) {}
+
+    private void startAdvancedSearchInBackground() {
+        if (selectedSkills == null || selectedSkills.isEmpty()) return;
+
+        final FilterOptions capturedOptions = gatherFilterOptions();
+        final List<Skill> skillsSnapshot = new ArrayList<>(selectedSkills);
+
+        SwingWorker<AdvancedSearchCandidates, Void> worker = new SwingWorker<>() {
+
+            @Override
+            protected AdvancedSearchCandidates doInBackground() {
+                Controller controller = new Controller(_ -> {}, this, dataStore);
+                DataPool fullPool = controller.getFilteredCandidates(skillsSnapshot, capturedOptions);
+                DataPool paretoPool = controller.getParetoPool(fullPool, skillsSnapshot, capturedOptions);
+                return new AdvancedSearchCandidates(fullPool, paretoPool);
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    if (isCancelled()) return;
+                    AdvancedSearchCandidates candidates = get();
+
+                    // modal: blocks here until the user closes the dialog
+                    AdvancedSearch dialog = new AdvancedSearch(GUI.this, candidates.fullPool(), candidates.paretoPool(),
+                            capturedOptions, skillsSnapshot);
+                    DataPool userChoice = dialog.getResult();
+
+                    if (userChoice != null) {
+                        startCombineInBackground(userChoice, skillsSnapshot, capturedOptions);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        searchWorker = worker;
+        worker.execute();
+    }
+
+    private void startCombineInBackground(DataPool userChoice, List<Skill> skillsSnapshot,
+                                          FilterOptions capturedOptions) {
+        previousSelectedSkills = new ArrayList<>(skillsSnapshot);
+
+        // phase 2: combine the user's manual selection, skipping the pareto filter entirely
+        SwingWorker<Void, Integer> worker = new SwingWorker<>() {
+
+            @Override
+            protected Void doInBackground() throws InterruptedException {
+                searchResults = null;
+
+                SwingUtilities.invokeLater(() -> {
+                    resultsPanel.removeAll();
+                    resultsPanel.revalidate();
+                    resultsPanel.repaint();
+                    progressBar.setValue(0);
+                });
+
+                Consumer<Integer> progressUpdater = this::publish;
+                Controller controller = new Controller(progressUpdater, this, dataStore);
+                searchResults = controller.combine(userChoice, skillsSnapshot, capturedOptions);
+
+                return null;
+            }
+
+            @Override
+            protected void process(List<Integer> chunks) {
+                progressBar.setValue(chunks.getLast());
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    if (isCancelled()) {
+                        onSearchCancelled();
+                        return;
+                    }
+                    get();
+                    onSearchComplete();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+        searchWorker = worker;
+        worker.execute();
     }
 
     private void onSearchCancelled() {

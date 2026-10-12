@@ -9,15 +9,19 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * Loads and provides access to all game data (armors, decorations, skills)
+ * from CSV files. Acts as the single source of truth for raw data.
+ */
 public class DataStore {
 
-    private static final String PATH_HELMETS = "data/helmets.csv";
-    private static final String PATH_PLATES = "data/plates.csv";
-    private static final String PATH_GAUNTLETS = "data/gauntlets.csv";
-    private static final String PATH_WAISTS = "data/waists.csv";
-    private static final String PATH_LEGGINGS = "data/leggings.csv";
-    private static final String PATH_DECORATIONS = "data/decorations.csv";
-    private static final String PATH_SKILLS = "data/skills.csv";
+    private final String pathHelmets;
+    private final String pathPlates;
+    private final String pathGauntlets;
+    private final String pathWaists;
+    private final String pathLeggings;
+    private final String pathDecorations;
+    private final String pathSkills;
 
     private final List<Armor> helmets;
     private final List<Armor> plates;
@@ -27,13 +31,28 @@ public class DataStore {
     private final List<Decoration> decorations;
     private final List<Skill> skills;
 
-
     public DataStore() throws IOException {
-        helmets = loadArmorList(PATH_HELMETS, "helmet");
-        plates = loadArmorList(PATH_PLATES, "plate");
-        gauntlets = loadArmorList(PATH_GAUNTLETS, "gauntlet");
-        waists = loadArmorList(PATH_WAISTS, "waist");
-        leggings = loadArmorList(PATH_LEGGINGS, "legging");
+        this("data/helmets.csv", "data/plates.csv", "data/gauntlets.csv",
+             "data/waists.csv", "data/leggings.csv", "data/decorations.csv",
+             "data/skills.csv");
+    }
+
+    public DataStore(String pathHelmets, String pathPlates, String pathGauntlets,
+                    String pathWaists, String pathLeggings, String pathDecorations,
+                    String pathSkills) throws IOException {
+        this.pathHelmets = pathHelmets;
+        this.pathPlates = pathPlates;
+        this.pathGauntlets = pathGauntlets;
+        this.pathWaists = pathWaists;
+        this.pathLeggings = pathLeggings;
+        this.pathDecorations = pathDecorations;
+        this.pathSkills = pathSkills;
+
+        helmets = loadArmorList(pathHelmets, "helmet");
+        plates = loadArmorList(pathPlates, "plate");
+        gauntlets = loadArmorList(pathGauntlets, "gauntlet");
+        waists = loadArmorList(pathWaists, "waist");
+        leggings = loadArmorList(pathLeggings, "legging");
         decorations = loadDecorationList();
         skills = loadSkillList();
     }
@@ -60,7 +79,7 @@ public class DataStore {
 
     private List<Decoration> loadDecorationList() throws IOException {
         List<Decoration> result = new ArrayList<>();
-        for (String[] row : CSVReader.readRows(DataStore.PATH_DECORATIONS)) {
+        for (String[] row : CSVReader.readRows(pathDecorations)) {
             result.add(new Decoration(row));
         }
         return result;
@@ -68,7 +87,7 @@ public class DataStore {
 
     private List<Skill> loadSkillList() throws IOException {
         List<Skill> result = new ArrayList<>();
-        for (String[] row : CSVReader.readRows(DataStore.PATH_SKILLS)) {
+        for (String[] row : CSVReader.readRows(pathSkills)) {
             result.add(new Skill(row));
         }
         return result;

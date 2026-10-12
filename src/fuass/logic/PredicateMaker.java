@@ -8,6 +8,10 @@ import fuass.model.Skill;
 import java.util.List;
 import java.util.function.Predicate;
 
+/**
+ * Creates predicate filters for armors and decorations based on
+ * selected skills and filter options.
+ */
 public class PredicateMaker {
 
     public Predicate<Armor> armorPredicate(List<Skill> skills, FilterOptions filterOptions) {

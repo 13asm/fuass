@@ -7,6 +7,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Tracks the current state during backtracking search: skill points, slot usage,
+ * and Torso Inc counters. Provides efficient add/remove operations for recursion.
+ */
 public class ArmorComboState {
 
     private static final int BAD_SKILL_THRESHOLD = -10;

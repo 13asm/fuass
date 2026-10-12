@@ -8,11 +8,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * an item A dominates item B if A is at least as good as B
- * in every relevant dimension and strictly better in at least one.
- * items that are dominated by any other candidate are removed from consideration.
+ * Implements Pareto dominance filtering to prune dominated candidates.
+ * An item A dominates item B if A is at least as good as B in every relevant
+ * dimension and strictly better in at least one. Dominated items are removed
+ * from consideration, significantly reducing the search space.
  */
-
 public class DominanceFilter {
 
     private DominanceFilter() {}

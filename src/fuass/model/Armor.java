@@ -3,6 +3,10 @@ package fuass.model;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Represents an armor piece with its stats, skills, materials, and properties.
+ * Immutable once constructed.
+ */
 public class Armor {
 
     private final int id;
@@ -92,7 +96,7 @@ public class Armor {
 
     public Armor(String type, int slots) {
         id = -1;
-        name = "any " + type + " with " + slots + " slots";
+        name = "any " + type + " with " + slots + (slots == 1 ? " slot" : " slots");
         //this.type = type;
         this.slots = slots;
         gender = null;

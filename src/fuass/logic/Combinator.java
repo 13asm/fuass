@@ -7,6 +7,11 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+/**
+ * Core combination engine that performs backtracking search over armor and decoration
+ * combinations to find those that satisfy the target skills.
+ * Uses pruning strategies and efficiency caching to reduce the search space.
+ */
 public class Combinator {
 
     private final Consumer<Integer> progressCallback;
@@ -78,8 +83,9 @@ public class Combinator {
         List<Combination> validCombinations = new ArrayList<>();
         AtomicInteger currentCount = new AtomicInteger(0);
 
-        combineRecursive(allArmors, decorations, skills, new ArrayList<>(5), validCombinations,
-                allowBadSkills, 0, true, currentCount, state);
+        SearchContext ctx = new SearchContext(allArmors, decorations, skills, validCombinations,
+                allowBadSkills, currentCount);
+        combineRecursive(ctx, new ArrayList<>(5), 0, true, state);
 
         progressCallback.accept(90);
 
@@ -103,37 +109,39 @@ public class Combinator {
 
     // ---armor backtracking---
 
-    private void combineRecursive(List<List<Armor>> allArmors,
-                                  List<Decoration> decorations,
-                                  List<Skill> skills,
-                                  List<Armor> currentArmorCombo,
-                                  List<Combination> validCombinations,
-                                  boolean allowBadSkills,
-                                  int pos,
-                                  boolean plateIsEmpty,
-                                  AtomicInteger currentCount,
-                                  ArmorComboState state) throws InterruptedException {
+    private record SearchContext(
+            List<List<Armor>> allArmors,
+            List<Decoration> decorations,
+            List<Skill> skills,
+            List<Combination> validCombinations,
+            boolean allowBadSkills,
+            AtomicInteger currentCount
+    ) {}
+
+    private void combineRecursive(SearchContext ctx, List<Armor> currentArmorCombo,
+                                  int pos, boolean plateIsEmpty, ArmorComboState state) throws InterruptedException {
 
         if (worker.isCancelled()) throw new InterruptedException();
 
         if (state.areTargetSkillsActivated()) {
-            if (!allowBadSkills && state.hasAnyBadSkill()) return;
+            if (!ctx.allowBadSkills() && state.hasAnyBadSkill()) return;
 
             ArrayList<Armor> finalCombination = new ArrayList<>(5);
             finalCombination.addAll(currentArmorCombo);
             for (int i = finalCombination.size(); i < 5; i++) finalCombination.add(null);
-            validCombinations.add(new Combination(finalCombination, Collections.emptyList(), null,
+            ctx.validCombinations().add(new Combination(finalCombination, Collections.emptyList(), null,
                     state.getWeaponSlots(), -1));
             return;
         }
 
-        if (tryWithDecos(decorations, currentArmorCombo, skills, validCombinations, allowBadSkills, state)) {
+        if (tryWithDecos(ctx.decorations(), currentArmorCombo, ctx.skills(), ctx.validCombinations(),
+                ctx.allowBadSkills(), state)) {
             return;
         }
 
-        if (pos == allArmors.size()) return;
+        if (pos == ctx.allArmors().size()) return;
 
-        for (Armor armor : allArmors.get(pos)) {
+        for (Armor armor : ctx.allArmors().get(pos)) {
 
             // a Torso Inc piece multiplies the plate's skills, so it is useless without a plate
             if (plateIsEmpty && armor != null && armor.hasTorsoInc()) continue;
@@ -144,12 +152,11 @@ public class Combinator {
             // pos 0 is the plate; once placed, Torso Inc pieces become eligible
             boolean newPlateIsEmpty = (pos != 0 || armor == null) && plateIsEmpty;
 
-            combineRecursive(allArmors, decorations, skills, currentArmorCombo, validCombinations,
-                    allowBadSkills, pos + 1, newPlateIsEmpty, currentCount, state);
+            combineRecursive(ctx, currentArmorCombo, pos + 1, newPlateIsEmpty, state);
 
             currentArmorCombo.removeLast();
             state.removeArmor(armor, pos);
-            progressCalculator(currentCount);
+            progressCalculator(ctx.currentCount());
         }
     }
 
@@ -367,6 +374,38 @@ public class Combinator {
         int S = skills.size();
         int D = decorations.size();
 
+        int[][] decoContribs = buildDecoContribs(decorations, skills);
+        int[] requiredPts = buildRequiredPts(skills);
+
+        int[] slotsWithoutPlate = slots.clone();
+        slotsWithoutPlate[0] = 0;
+        int slotsNeeded = optimistSlotsNeeded - plateSlots;
+        int otherSlots  = totalSlots - plateSlots;
+
+        TorsoCaseResult bestResult = findBestTorsoCase(plateCombos, decorations, skills, currentPoints,
+                torsoCounter, slotsNeeded, otherSlots, slotsWithoutPlate, decoContribs, requiredPts);
+
+        if (bestResult != null) {
+            if (!allowBadSkills) {
+                if (Calculator.hasAnyBadSkill(
+                        Calculator.getPointsMap(currentArmorCombo, bestResult.decoCombo(),
+                                bestResult.plateCombo(), torsoCounter))) {
+                    return true;
+                }
+            }
+            List<Armor> okCombination = new ArrayList<>(currentArmorCombo);
+            while (okCombination.size() < 5) okCombination.add(null);
+            validCombinations.add(new Combination(okCombination, bestResult.decoCombo(),
+                    bestResult.plateCombo(), weaponSlots, torsoCounter));
+            return true;
+        }
+
+        return false;
+    }
+
+    private int[][] buildDecoContribs(List<Decoration> decorations, List<Skill> skills) {
+        int S = skills.size();
+        int D = decorations.size();
         int[][] decoContribs = new int[D][S];
         for (int i = 0; i < D; i++) {
             Decoration deco = decorations.get(i);
@@ -374,16 +413,25 @@ public class Combinator {
                 decoContribs[i][j] = deco.getSkillPoints(skills.get(j).getPointsName());
             }
         }
+        return decoContribs;
+    }
 
-        int[] requiredPts = new int[S];
-        for (int j = 0; j < S; j++) requiredPts[j] = skills.get(j).getPointsToActivate();
+    private int[] buildRequiredPts(List<Skill> skills) {
+        int[] requiredPts = new int[skills.size()];
+        for (int j = 0; j < skills.size(); j++) {
+            requiredPts[j] = skills.get(j).getPointsToActivate();
+        }
+        return requiredPts;
+    }
 
-        int[] slotsWithoutPlate = slots.clone();
-        slotsWithoutPlate[0] = 0;
-        int slotsNeeded = optimistSlotsNeeded - plateSlots;
-        int otherSlots  = totalSlots - plateSlots;
+    private record TorsoCaseResult(List<Decoration> decoCombo, List<Decoration> plateCombo) {}
 
-        List<Decoration> bestDecoCombo  = null;
+    private TorsoCaseResult findBestTorsoCase(List<List<Decoration>> plateCombos, List<Decoration> decorations,
+                                             List<Skill> skills, Map<String, Integer> currentPoints,
+                                             int torsoCounter, int slotsNeeded, int otherSlots,
+                                             int[] slotsWithoutPlate, int[][] decoContribs, int[] requiredPts) {
+        int S = skills.size();
+        List<Decoration> bestDecoCombo = null;
         List<Decoration> bestPlateCombo = null;
         int bestSlotsUsed = Integer.MAX_VALUE;
 
@@ -395,7 +443,6 @@ public class Combinator {
                 currentPts[j] = newPoints.getOrDefault(skills.get(j).getPointsName(), 0);
             }
 
-            // single-element arrays used as mutable out-parameters (Java has no ref/out keyword)
             boolean[] found = {false};
             @SuppressWarnings("unchecked")
             List<Decoration>[] decoSolutionRef = new List[1];
@@ -406,8 +453,8 @@ public class Combinator {
 
                 if (found[0]) {
                     if (usedSlots < bestSlotsUsed) {
-                        bestSlotsUsed  = usedSlots;
-                        bestDecoCombo  = new ArrayList<>(decoSolutionRef[0]);
+                        bestSlotsUsed = usedSlots;
+                        bestDecoCombo = new ArrayList<>(decoSolutionRef[0]);
                         bestPlateCombo = plateCombo;
                     }
                     break;
@@ -416,20 +463,9 @@ public class Combinator {
         }
 
         if (bestDecoCombo != null) {
-            if (!allowBadSkills) {
-                if (Calculator.hasAnyBadSkill(
-                        Calculator.getPointsMap(currentArmorCombo, bestDecoCombo, bestPlateCombo, torsoCounter))) {
-                    return true;
-                }
-            }
-            List<Armor> okCombination = new ArrayList<>(currentArmorCombo);
-            while (okCombination.size() < 5) okCombination.add(null);
-            validCombinations.add(new Combination(okCombination, bestDecoCombo, bestPlateCombo,
-                    weaponSlots, torsoCounter));
-            return true;
+            return new TorsoCaseResult(bestDecoCombo, bestPlateCombo);
         }
-
-        return false;
+        return null;
     }
 
     private void generatePlateCombos(List<Decoration> decorations, int plateSlotSize,

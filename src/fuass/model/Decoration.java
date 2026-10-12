@@ -4,6 +4,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Represents a decoration (jewel) with its size, skills, and materials.
+ * Immutable once constructed.
+ */
 public class Decoration {
 
     private final int id;
